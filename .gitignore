@@ -1,1 +1,7 @@
 data/
+results/
+fine-tuned-bert/
+fine-tuned-bert2/
+logs/
+logsGPT2/
+resultsGPT2/
