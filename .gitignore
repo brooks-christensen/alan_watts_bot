@@ -5,3 +5,9 @@ fine-tuned-bert2/
 logs/
 logsGPT2/
 resultsGPT2/
+fine-tuned-gpt2/
+fine-tuned-gpt2-continued/
+logsGPT2b/
+logsGPT2c/
+resultsGPT2b/
+resultsGPT2c/
