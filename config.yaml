@@ -1,0 +1,38 @@
+paths:
+  data_path: "./data/output_final_sorted.txt"
+  model_path: "./model/"
+  log_path: "./logs/"
+
+tokenizer:
+  max_length: 768
+
+optimizer:
+  type: "AdamW"
+  adamw:
+    lr: 5e-4
+    adam_epsilon: 1e-8
+    weight_decay: 0.0
+
+training:
+  logger_level: "INFO"
+  seed_val: 42
+  batch_size: 2
+  train_percent: 0.8
+  epochs: 15
+  warmup_steps: 1e2
+  sample_every: 100
+  max_patience: 5
+  
+testing:
+  logger_level: "DEBUG"
+  test_flag: False
+  test_length: 10000
+
+generation:
+  do_sample: True
+  temperature: 1.0
+  top_k: 50
+  max_length: 200
+  top_p: 0.90
+  num_return_sequences: 3
+  num_return_sequences_training: 1
