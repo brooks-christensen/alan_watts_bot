@@ -1,5 +1,5 @@
 paths:
-  data_path: "./data/output_final_sorted.txt"
+  data_path: "../data/output_final_sorted.txt"
   model_path: "./model/"
   log_path: "./logs/"
 
@@ -9,19 +9,22 @@ tokenizer:
 optimizer:
   type: "AdamW"
   adamw:
-    lr: 5e-4
+    lr: 1e-5
     adam_epsilon: 1e-8
-    weight_decay: 0.0
+    weight_decay: 0.02
+    beta1: 0.9
+    beta2: 0.99
 
 training:
   logger_level: "INFO"
   seed_val: 42
   batch_size: 2
   train_percent: 0.8
-  epochs: 15
+  epochs: 100
   warmup_steps: 1e2
   sample_every: 100
-  max_patience: 5
+  max_patience: 10
+  num_workers: 4
   
 testing:
   logger_level: "DEBUG"
@@ -32,7 +35,7 @@ generation:
   do_sample: True
   temperature: 1.0
   top_k: 50
-  max_length: 200
-  top_p: 0.90
+  max_length: 300
+  top_p: 0.95
   num_return_sequences: 3
   num_return_sequences_training: 1

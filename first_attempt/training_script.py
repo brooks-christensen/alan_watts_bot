@@ -15,6 +15,7 @@ import pandas as pd
 # import seaborn as sns
 import numpy as np
 import random
+import json
 
 from typing import List, Dict, Any, Tuple
 
@@ -101,7 +102,8 @@ def create_dataloaders(
     tokenizer: GPT2Tokenizer, 
     batch_size: int = 2, 
     train_percent: float = 0.8, 
-    max_length: int = 768
+    max_length: int = 768,
+    num_workers: int = 4
 ) -> List[DataLoader]:
     """
     Create the training and validation dataloaders
@@ -137,14 +139,16 @@ def create_dataloaders(
     train_dataloader = DataLoader(
         train_dataset,  # The training samples.
         sampler = SequentialSampler(train_dataset), # Select batches randomly
-        batch_size = batch_size # Trains with this batch size.
+        batch_size = batch_size, # Trains with this batch size.
+        num_workers=num_workers
     )
 
     # For validation the order doesn't matter, so we'll just read them sequentially.
     validation_dataloader = DataLoader(
         val_dataset, # The validation samples.
         sampler = SequentialSampler(val_dataset), # Pull out batches sequentially.
-        batch_size = batch_size # Evaluate with this batch size.
+        batch_size = batch_size, # Evaluate with this batch size.
+        num_workers=num_workers
     )
 
     return train_dataloader, validation_dataloader
@@ -268,7 +272,8 @@ def create_optimizer(config: Dict[str, Any], model: GPT2LMHeadModel) -> AdamW:
             model.parameters(),
             lr=float(opt_config['lr']),
             eps=float(opt_config['adam_epsilon']),
-            weight_decay=opt_config['weight_decay']
+            weight_decay=opt_config['weight_decay'],
+            betas=(opt_config['beta1'], opt_config['beta2'])
         )
 
     return optimizer
@@ -397,7 +402,7 @@ def train(
             if step % config['training']['sample_every'] == 0 and not step == 0:
 
                 elapsed = format_time(time.time() - t0)
-                logger.info('  Batch {:>5,}  of  {:>5,}. Loss: {:>5,}.   Elapsed: {:}.'.format(step, len(train_dataloader), batch_loss, elapsed))
+                logger.info('  Batch {:>5,}  of  {:>5,}. Loss: {:>5,}.   Total Elapsed this Epoch: {:}.'.format(step, len(train_dataloader), batch_loss, elapsed))
 
                 model.eval()
 
@@ -410,19 +415,20 @@ def train(
                 #     num_return_sequences=1
                 # )
 
-                sample_outputs = model.generate(
-                    # generated,
-                    input_ids=input_ids,
-                    attention_mask=attention_mask,  # Include the attention mask
-                    # bos_token_id=random.randint(1,30000),
-                    do_sample=config['generation']['do_sample'],
-                    temperature=config['generation']['temperature'],
-                    top_k=config['generation']['top_k'],
-                    max_length=config['generation']['max_length'],
-                    top_p=config['generation']['top_p'],
-                    num_return_sequences=config['generation']['num_return_sequences_training'],
-                    pad_token_id=tokenizer.eos_token_id  # Set pad token ID explicitly
-                )
+                with torch.no_grad():
+                    sample_outputs = model.generate(
+                        # generated,
+                        input_ids=input_ids,
+                        attention_mask=attention_mask,  # Include the attention mask
+                        # bos_token_id=random.randint(1,30000),
+                        do_sample=config['generation']['do_sample'],
+                        temperature=config['generation']['temperature'],
+                        top_k=config['generation']['top_k'],
+                        max_length=config['generation']['max_length'],
+                        top_p=config['generation']['top_p'],
+                        num_return_sequences=config['generation']['num_return_sequences_training'],
+                        pad_token_id=tokenizer.eos_token_id  # Set pad token ID explicitly
+                    )
 
                 for i, sample_output in enumerate(sample_outputs):
                     logger.info("{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))
@@ -484,7 +490,7 @@ def train(
 
         validation_time = format_time(time.time() - t0)
 
-        logger.info("  Validation Loss: {0:.2f}".format(avg_val_loss))
+        logger.info("  Validation Loss: {0:.5f}".format(avg_val_loss))
         logger.info("  Validation took: {:}".format(validation_time))
 
         # Record all statistics from this epoch.
@@ -502,7 +508,8 @@ def train(
             best_val_loss = avg_val_loss
             best_model_state_dict = model.state_dict()
             patience = 0
-            logger.info("New best model found!\nValidation loss: {:.4f}".format(best_val_loss))
+            logger.info("New best model found!")
+            logger.info("Validation loss: {:.5f}".format(best_val_loss))
         else:
             patience += 1
             logger.info("No improvement in validation loss. Patience: {}/{}".format(patience, max_patience))
@@ -539,7 +546,7 @@ def training_reporting(
     pd.set_option('display.max_columns', None)  # Show all columns
     pd.set_option('display.width', 1000)  # Set overall width
     pd.set_option('display.max_colwidth', 50) # Set maximum column width
-    pd.set_option('display.precision', 2)  # Set decimal precision
+    pd.set_option('display.precision', 5)  # Set decimal precision
     training_stats_df = pd.DataFrame(training_stats)
     logger.info(f"\n{training_stats_df.to_string(index=False)}")
 
@@ -577,7 +584,10 @@ def save_training_data(config: dict, model: GPT2LMHeadModel, tokenizer: GPT2Toke
     tokenizer.save_pretrained(output_dir)
 
     # Good practice: save your training arguments together with the trained model
-    torch.save(config, os.path.join(output_dir, 'training_args.pt'))
+    # torch.save(config, os.path.join(output_dir, 'training_args.pt'))
+    # save configurations as json file
+    with open(os.path.join(output_dir, 'training_args.json'), 'w') as f:
+        json.dump(config, f)
 
 
 def generate_text(model, tokenizer, device, config) -> None:
@@ -635,9 +645,11 @@ def generate_text(model, tokenizer, device, config) -> None:
 if __name__ == '__main__':
 
     # load the config file
+    print('loading config...')
     config = load_config()
 
     # add logging
+    print('adding logging...')
     logger.remove()
     if config['testing']['test_flag']:
         logger.add(sys.stdout, level=config['testing']['logger_level'])
@@ -667,12 +679,16 @@ if __name__ == '__main__':
         tokenizer=tokenizer, 
         batch_size=config['training']['batch_size'], 
         train_percent=config['training']['train_percent'], 
-        max_length=config['tokenizer']['max_length']
+        max_length=config['tokenizer']['max_length'],
+        num_workers=config['training']['num_workers']
     )
 
     # create model
     logger.info("Creating model...")
     model, device = create_model(tokenizer=tokenizer)
+
+    # reporting
+    logger.info(f"Number of parameters: {model.num_parameters()}")
 
     # set the random seeds
     logger.info("Setting random seeds...")
@@ -692,7 +708,7 @@ if __name__ == '__main__':
 
     # Training
     logger.info("Training model...")
-    model, training_stats, total_t0 = train(
+    fine_tuned_model, training_stats, total_t0 = train(
         model=model, 
         device=device, 
         train_dataloader=train_dataloader, 
@@ -706,12 +722,12 @@ if __name__ == '__main__':
     training_reporting(total_t0=total_t0, training_stats=training_stats)
 
     # save training data
-    save_training_data(config=config, model=model, tokenizer=tokenizer)
+    save_training_data(config=config, model=fine_tuned_model, tokenizer=tokenizer)
 
     # Generate Text
     logger.info("Generating text...")
     generate_text(
-        model=model, 
+        model=fine_tuned_model, 
         tokenizer=tokenizer, 
         device=device, 
         config=config
