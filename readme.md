@@ -40,12 +40,19 @@ The chatbot should be able to
 
 ### Fine-Tuning GPT2 Model on LLM Data
 - decoder-only model
-- load input
-- tokenize input
-- create dataloaders
-- load GPT2
-- create optimizer
-- create LR scheduler
-- train
-- evaluation / reporting
-- generate text
+- process overview:
+    - load input
+    - tokenize input
+    - create dataloaders
+    - load GPT2
+    - create optimizer
+    - create LR scheduler
+    - train
+    - evaluation / reporting
+    - generate text
+- next steps:
+    - understand how hyperparameters from [Andrej Karpathy's video](https://www.youtube.com/watch?v=kCc8FmEb1nY) will need to be adjusted to compensate for the increased number of parameters in the model compared to the Shakespeare generator model
+    - Ensure the data is being loaded properly into the pretrained ChatGPT2 model
+        - dimensions
+        - size
+        - number
