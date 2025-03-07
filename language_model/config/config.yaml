@@ -39,4 +39,4 @@ generation:
   top_p: 0.95
   num_return_sequences: 3
   num_return_sequences_training: 1
-  model_version: ""
+  model_version: "03-07-2025T14-10-08"

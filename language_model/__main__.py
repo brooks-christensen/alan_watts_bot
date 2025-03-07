@@ -120,7 +120,7 @@ def main():
     elif args.mode == 'generate':
 
         # load fine tuned model
-        model_path = Path(config['paths']['model_path']).resolve() / f"{config['generation']['model_version']}.pth"
+        model_path = Path(config['paths']['model_path']).resolve() / f"{config['generation']['model_version']}"
         logger.info(f"Loading fine-tuned model from {model_path}...")
         model = GPT2LMHeadModel.from_pretrained(model_path)
         model = model.to(device)
