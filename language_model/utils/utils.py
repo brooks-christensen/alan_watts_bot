@@ -89,7 +89,7 @@ def save_training_data(config: dict, model: GPT2LMHeadModel, tokenizer: GPT2Toke
 
     current_time = datetime.now().strftime("%m-%d-%YT%H-%M-%S")
     if config['testing']['test_flag']:
-        output_dir = output_dir / 'test' / current_time
+        output_dir = output_dir / 'test' / f"training_{current_time}.log"
     else:
         output_dir = output_dir / current_time
 
@@ -102,13 +102,10 @@ def save_training_data(config: dict, model: GPT2LMHeadModel, tokenizer: GPT2Toke
     # Save a trained model, configuration and tokenizer using `save_pretrained()`.
     # They can then be reloaded using `from_pretrained()`
     model_to_save = model.module if hasattr(model, 'module') else model  # Take care of distributed/parallel training
-    model_files = model_to_save.save_pretrained(output_dir)
-    for file in model_files:
-        logger.info(f'Saved model file to : {file}')
-    tokenizer_files = tokenizer.save_pretrained(output_dir)
-    logger.info('Tokenizer files:')
-    for file in tokenizer_files:
-        logger.info(file)
+    model_to_save.save_pretrained(output_dir)
+    logger.info(f'Saved model to : {output_dir}')
+    tokenizer.save_pretrained(output_dir)
+    logger.info(f'Tokenizer saved to: {output_dir}')
 
     # Good practice: save your training arguments together with the trained model
     # torch.save(config, os.path.join(output_dir, 'training_args.pt'))

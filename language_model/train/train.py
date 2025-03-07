@@ -6,6 +6,8 @@ from torch import no_grad
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LambdaLR
+import os
+from torch import load as torchload
 
 from ..utils.utils import format_time
   
@@ -220,3 +222,62 @@ def train(
         model.load_state_dict(best_model_state_dict)
 
     return model, training_stats, total_t0
+
+
+def resume_training_if_possible(model, optimizer, scheduler, config):
+    checkpoint_path = config['paths']['checkpoint_path']
+    start_epoch = 0
+    if os.path.exists(checkpoint_path):
+        logger.info(f"Found checkpoint at {checkpoint_path}. Resuming training...")
+        checkpoint = torchload(checkpoint_path)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        start_epoch = checkpoint['epoch'] + 1
+        logger.info(f"Resuming from epoch {start_epoch}")
+    return start_epoch
+
+# def train(model, device, train_dataloader, validation_dataloader, tokenizer,
+#           optimizer, scheduler, config, start_epoch=0, max_epochs=None):
+#     total_t0 = time.time()
+#     training_stats = []
+#     best_val_loss = float('inf')
+#     max_patience = config['training']['max_patience']
+#     patience = 0
+#     checkpoint_path = config['paths']['checkpoint_path']
+
+#     for epoch in range(start_epoch, config['training']['epochs'] if max_epochs is None else max_epochs):
+#         logger.info(f"Epoch {epoch+1}/{config['training']['epochs']}")
+#         # (Your existing training loop code goes here.)
+#         # ...
+        
+#         # After validation, compute average validation loss:
+#         avg_val_loss = total_eval_loss / len(validation_dataloader)
+#         logger.info("Validation Loss: {:.5f}".format(avg_val_loss))
+        
+#         # Save checkpoint if this is the best model so far:
+#         if avg_val_loss < best_val_loss:
+#             best_val_loss = avg_val_loss
+#             checkpoint = {
+#                 'epoch': epoch,
+#                 'model_state_dict': model.state_dict(),
+#                 'optimizer_state_dict': optimizer.state_dict(),
+#                 'scheduler_state_dict': scheduler.state_dict(),
+#                 'best_val_loss': best_val_loss,
+#             }
+#             torch.save(checkpoint, checkpoint_path)
+#             logger.info("Checkpoint saved.")
+#             patience = 0  # Reset patience
+#         else:
+#             patience += 1
+#             if patience >= max_patience:
+#                 logger.info("Early stopping triggered.")
+#                 break
+        
+#         # Log training statistics
+#         training_stats.append({
+#             'epoch': epoch + 1,
+#             'Valid. Loss': avg_val_loss,
+#             # other stats...
+#         })
+#     return model, training_stats, total_t0

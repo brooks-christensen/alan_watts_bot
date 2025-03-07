@@ -7,6 +7,7 @@ from loguru import logger
 from torch.cuda import is_available
 # from torch import load as torchload
 from pathlib import Path
+import optuna
 
 from .config.config import load_config
 from .data.data import load_training_text, create_dataloaders
@@ -20,11 +21,11 @@ def main():
 
     # parse arguments
     parser = argparse.ArgumentParser(description='Train or generate text using the GPT-2 model.')
-    parser.add_argument('mode', choices=['train', 'generate'], help='Mode to run the script in: "train" or "generate"')
+    parser.add_argument('mode', choices=['train', 'generate', 'optimize'], help='Mode to run the script in: "train" or "generate"')
     args = parser.parse_args()
 
-    if args.mode not in ['train', 'generate']:
-        logger.error("Invalid mode. Choose 'train' or 'generate'.")
+    if args.mode not in ['train', 'generate', 'optimize']:
+        logger.error("Invalid mode. Choose 'train', 'generate', or 'optimize'.")
         sys.exit(1)
 
     # load the config file
@@ -38,7 +39,7 @@ def main():
         logger.add(sys.stdout, level=config['testing']['logger_level'])
     else:
         logger.add(sys.stdout, level=config['training']['logger_level'])
-        log_path = config['paths']['log_path'] + f"training_{str(time.time())}.log"
+        log_path = config['paths']['log_path'] + time.strftime("%m-%d-%YT%H-%M-%S") + ".log"
         logger.add(log_path, level=config['training']['logger_level'])
 
     # Load the GPT tokenizer
@@ -136,6 +137,53 @@ def main():
             device=device, 
             config=config
         )
+
+    elif args.mode == 'optimize':
+        def objective(trial):
+            # Sample hyperparameters
+            learning_rate = trial.suggest_loguniform('learning_rate', 1e-5, 1e-3)
+            batch_size = trial.suggest_categorical('batch_size', [4, 8, 16, 32])
+            # Update your configuration with these sampled hyperparameters.
+            config['training']['learning_rate'] = learning_rate
+            config['training']['batch_size'] = batch_size
+            
+            # Re-create your dataloaders, model, optimizer, and scheduler with new parameters
+            train_dataloader, validation_dataloader = create_dataloaders(
+                training_text=training_text, 
+                tokenizer=tokenizer, 
+                batch_size=batch_size, 
+                train_percent=config['training']['train_percent'], 
+                max_length=config['tokenizer']['max_length'],
+                num_workers=config['training']['num_workers']
+            )
+            model = create_model(tokenizer=tokenizer).to(device)
+            optimizer = create_optimizer(config=config, model=model)
+            scheduler = create_scheduler(
+                config=config, 
+                optimizer=optimizer, 
+                train_dataloader=train_dataloader
+            )
+            
+            # Train for a few epochs (or one epoch) to get a validation score.
+            _, training_stats, _ = train(
+                model=model, 
+                device=device, 
+                train_dataloader=train_dataloader, 
+                validation_dataloader=validation_dataloader, 
+                tokenizer=tokenizer,
+                optimizer=optimizer, 
+                scheduler=scheduler, 
+                config=config,
+                start_epoch=0,          # See checkpointing modifications below.
+                max_epochs=3            # Short run for tuning.
+            )
+            # Return the validation loss from the last epoch as the objective.
+            val_loss = training_stats[-1]['Valid. Loss']
+            return val_loss
+        
+        study = optuna.create_study(direction='minimize')
+        study.optimize(objective, n_trials=20)
+        print("Best hyperparameters:", study.best_params)
 
 
 if __name__ == '__main__':
