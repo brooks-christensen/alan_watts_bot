@@ -13,3 +13,4 @@ resultsGPT2b/
 resultsGPT2c/
 model/
 model*/
+*.pyc

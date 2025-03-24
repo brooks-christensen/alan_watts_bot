@@ -1,0 +1,7 @@
+loguru
+torch
+numpy
+pandas
+transformers
+nltk
+optuna
