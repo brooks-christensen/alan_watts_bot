@@ -1,5 +1,10 @@
 # Alan Watts Chatbot Release Notes
 
+## THIS PROJECT IS STILL UNDER ACTIVE DEVELOPMENT
+The development has primarily been conducted in notebooks to-date, although an initial automated training pipeline was created.
+
+Since a dialogic dataset is required to interact with the language model as intended, the training pipeline needs to be redesigned to accommodate from the current monologic generation style that is currently in place.
+
 ## Project Objectives
 After listening to some great lectures from the late Philosopher Alan Watts, I was inspired to create a chatbot that can give answers to life's great questions in his unique style.
 
