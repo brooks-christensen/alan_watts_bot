@@ -3,6 +3,8 @@ paths:
   model_save_path: "./language_model/models/"
   model_load_path: "./language_model/model/"
   log_path: "./language_model/logs/"
+  model_zip_url: "https://github.com/brooks-christensen/alan_watts_bot/releases/download/1.0.0/03-07-2025T14-10-08.zip"
+  model_dir: "./model"
 
 general:
   seed_val: 42

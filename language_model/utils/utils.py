@@ -10,6 +10,8 @@ import time
 import json
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from pathlib import Path
+import requests
+import zipfile
 
 from language_model.config.config import load_config
 
@@ -118,3 +120,29 @@ def save_training_data(config: dict, model: GPT2LMHeadModel, tokenizer: GPT2Toke
     logger.info(f'Saving configurations to {Path(output_dir)}')
     with open(os.path.join(output_dir, 'training_args.json'), 'w') as f:
         json.dump(config, f)
+
+
+def download_and_extract_model() -> None:
+    if os.path.exists(config['paths']['model_dir']):
+        logger.info("Model directory already exists.")
+        return
+
+    os.makedirs(config['paths']['model_dir'], exist_ok=True)
+    zip_path = os.path.join(config['paths']['model_dir'], "model.zip")
+    
+    logger.info("Downloading model archive...")
+    response = requests.get(config['paths']['model_zip_url'], stream=True)
+    if response.status_code == 200:
+        with open(zip_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+        logger.success("Download complete.")
+    else:
+        raise Exception(f"Failed to download model archive. HTTP status: {response.status_code}")
+
+    logger.info("Extracting model archive...")
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(config['paths']['model_dir'])
+    os.remove(zip_path)
+    print("Extraction complete. Model is ready for use.")
