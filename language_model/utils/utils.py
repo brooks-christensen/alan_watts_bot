@@ -123,12 +123,14 @@ def save_training_data(config: dict, model: GPT2LMHeadModel, tokenizer: GPT2Toke
 
 
 def download_and_extract_model() -> None:
-    if os.path.exists(config['paths']['model_dir']):
-        logger.info("Model directory already exists.")
+    model_dir = str(Path(config['paths']['model_dir']).resolve())
+    if os.path.exists(model_dir):
+        logger.info(f"Model directory at {model_dir} already exists.")
         return
-
-    os.makedirs(config['paths']['model_dir'], exist_ok=True)
-    zip_path = os.path.join(config['paths']['model_dir'], "model.zip")
+    
+    logger.info(f"Creating model directory at: {model_dir}")
+    os.makedirs(model_dir, exist_ok=True)
+    zip_path = os.path.join(model_dir, "model.zip")
     
     logger.info("Downloading model archive...")
     response = requests.get(config['paths']['model_zip_url'], stream=True)
@@ -143,6 +145,6 @@ def download_and_extract_model() -> None:
 
     logger.info("Extracting model archive...")
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
-        zip_ref.extractall(config['paths']['model_dir'])
+        zip_ref.extractall(model_dir)
     os.remove(zip_path)
     print("Extraction complete. Model is ready for use.")

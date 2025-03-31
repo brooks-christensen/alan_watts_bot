@@ -10,8 +10,8 @@ import optuna
 
 from .config.config import load_config
 from .data.data import load_training_text, create_dataloaders
-from .utils.utils import set_seeds, training_reporting, save_training_data
-from .model.model import create_model, create_optimizer, create_scheduler
+from .utils.utils import set_seeds, training_reporting, save_training_data, download_and_extract_model
+from .optimization.model import create_model, create_optimizer, create_scheduler
 from .train.train import train
 from .train.generate import generate_text
 
@@ -135,6 +135,8 @@ def main():
         save_training_data(config=config, model=fine_tuned_model, tokenizer=tokenizer)
 
     elif args.mode == 'generate':
+        # download and extract model if not present already
+        download_and_extract_model()
 
         # load fine tuned model
         model_path = Path(config['paths']['model_load_path']).resolve() / f"{config['generation']['model_version']}"
