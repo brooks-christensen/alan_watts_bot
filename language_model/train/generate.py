@@ -27,8 +27,8 @@ def generate_text(model, tokenizer, device, config) -> None:
     attention_mask = inputs['attention_mask']  # The attention mask
 
     # Print the generated input tensor
-    logger.info(input_ids)
-    logger.info(attention_mask)
+    logger.debug(f"input_ids: {input_ids}")
+    logger.debug(f"attention_mask: {attention_mask}")
 
     sample_outputs = model.generate(
         # generated,
@@ -44,8 +44,15 @@ def generate_text(model, tokenizer, device, config) -> None:
         pad_token_id=tokenizer.eos_token_id  # Set pad token ID explicitly
     )
 
-    for i, sample_output in enumerate(sample_outputs):
-        logger.info("{}: {}\n\n".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))
+    lso = len(sample_outputs)
+
+    if lso > 1:
+        for i, sample_output in enumerate(sample_outputs):
+            logger.success(f"Generated text sample {i + 1} / {lso}:\n{format(tokenizer.decode(sample_output, skip_special_tokens=True))}")
+    elif lso == 1:
+        logger.success(f"Sample generated text:\n{format(tokenizer.decode(sample_output, skip_special_tokens=True))}")
+    else:
+        logger.warning("No output found....")
 
     # token = tokenizer.decode([36])
     # print(f"Token ID 36 corresponds to: {token}")
