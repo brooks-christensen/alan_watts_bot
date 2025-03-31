@@ -4,7 +4,8 @@ import yaml
 @dataclass
 class PathsConfig:
     data_path: str
-    model_path: str
+    model_save_path: str
+    model_load_path: str
     log_path: str
     
 @dataclass

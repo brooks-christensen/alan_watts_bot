@@ -1,6 +1,7 @@
 paths:
   data_path: "./data/output_final_sorted.txt"
-  model_path: "./language_model/model/"
+  model_save_path: "./language_model/models/"
+  model_load_path: "./language_model/model/"
   log_path: "./language_model/logs/"
 
 tokenizer:
