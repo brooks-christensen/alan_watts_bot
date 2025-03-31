@@ -4,6 +4,9 @@ paths:
   model_load_path: "./language_model/model/"
   log_path: "./language_model/logs/"
 
+general:
+  seed_val: 42
+
 tokenizer:
   max_length: 768
 
@@ -18,7 +21,6 @@ optimizer:
 
 training:
   logger_level: "INFO"
-  seed_val: 42
   batch_size: 2
   train_percent: 0.8
   epochs: 100
