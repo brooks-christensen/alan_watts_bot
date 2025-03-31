@@ -11,6 +11,6 @@ logsGPT2b/
 logsGPT2c/
 resultsGPT2b/
 resultsGPT2c/
-model/
-model*/
+models/
 *.pyc
+.old/
