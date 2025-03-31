@@ -14,3 +14,4 @@ resultsGPT2c/
 models/
 *.pyc
 .old/
+model/
