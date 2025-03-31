@@ -15,13 +15,29 @@ from .utils.utils import set_seeds, training_reporting, save_training_data
 from .model.model import create_model, create_optimizer, create_scheduler
 from .train.train import train
 from .train.generate import generate_text
+import random
+import numpy as np
+import torch
   
 
 def main():
 
     # parse arguments
     parser = argparse.ArgumentParser(description='Train or generate text using the GPT-2 model.')
-    parser.add_argument('mode', choices=['train', 'generate', 'optimize'], help='Mode to run the script in: "train" or "generate"')
+    subparsers = parser.add_subparsers(dest='mode', help='Mode to run the script in')
+
+    # Subparser for 'train' mode
+    train_parser = subparsers.add_parser('train', help='Train the model')
+    # Add train-specific arguments here if needed
+
+    # Subparser for 'generate' mode
+    generate_parser = subparsers.add_parser('generate', help='Generate text using the model')
+    generate_parser.add_argument('--seed', '-s', type=int, default=None, help='Value for random seeding (for reproducibility)')
+
+    # Subparser for 'optimize' mode
+    optimize_parser = subparsers.add_parser('optimize', help='Optimize hyperparameters')
+    # Add optimize-specific arguments here if needed
+
     args = parser.parse_args()
 
     if args.mode not in ['train', 'generate', 'optimize']:
@@ -31,6 +47,9 @@ def main():
     # load the config file
     logger.info('Loading config...')
     config = load_config()
+
+    if args.seed is not None and isinstance(args.seed, (int, float)):
+        set_seeds(config)
 
     # add logging
     logger.info('Adding logging...')
@@ -84,7 +103,8 @@ def main():
 
         # set the random seeds
         logger.info("Setting random seeds...")
-        set_seeds(config=config)
+        if args.seed is not None and isinstance(args.seed, (int, float)):
+            set_seeds(config=config)
 
         # create the optimizer
         logger.info("Creating optimizer...")
@@ -120,7 +140,7 @@ def main():
     elif args.mode == 'generate':
 
         # load fine tuned model
-        model_path = Path(config['paths']['model_path']).resolve() / f"{config['generation']['model_version']}"
+        model_path = Path(config['paths']['model_load_path']).resolve() / f"{config['generation']['model_version']}"
         logger.info(f"Loading fine-tuned model from {model_path}...")
         model = GPT2LMHeadModel.from_pretrained(model_path)
         model = model.to(device)

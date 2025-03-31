@@ -85,7 +85,7 @@ def save_training_data(config: dict, model: GPT2LMHeadModel, tokenizer: GPT2Toke
     # Saving best-practices: if you use defaults names for the model, you can reload it using from_pretrained()
 
     # Construct output directory path
-    output_dir = Path(config['paths']['model_path']).resolve()
+    output_dir = Path(config['paths']['model_save_path']).resolve()
 
     current_time = datetime.now().strftime("%m-%d-%YT%H-%M-%S")
     if config['testing']['test_flag']:
