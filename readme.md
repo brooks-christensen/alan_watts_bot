@@ -17,7 +17,7 @@ python3 -m language_model generate
 For reproducible output:
 
 ```bash
-python3 -m language_model generate --seed 42
+python3 -m language_model generate --seed 45
 ```
 
 ## How to Train
