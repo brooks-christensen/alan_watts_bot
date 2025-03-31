@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 import random
 import numpy as np
 import torch
@@ -10,6 +10,11 @@ import time
 import json
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from pathlib import Path
+
+from language_model.config.config import load_config
+
+
+config = load_config()
 
 
 def format_time(elapsed: float) -> str:
@@ -28,7 +33,7 @@ def format_time(elapsed: float) -> str:
     return str(timedelta(seconds=int(round((elapsed)))))
 
 
-def set_seeds(config: Dict[str, Any]) -> None:
+def set_seeds(seed_val: Union[int, float] = config['general']['seed_val']) -> None:
     """
     Set the random seeds for reproducibility
 
@@ -37,10 +42,10 @@ def set_seeds(config: Dict[str, Any]) -> None:
     config (Dict[str, Any]): the config file
     """
 
-    random.seed(config['training']['seed_val'])
-    np.random.seed(config['training']['seed_val'])
-    torch.manual_seed(config['training']['seed_val'])
-    torch.cuda.manual_seed_all(config['training']['seed_val'])
+    random.seed(seed_val)
+    np.random.seed(seed_val)
+    torch.manual_seed(seed_val)
+    torch.cuda.manual_seed_all(seed_val)
 
 
 def training_reporting(

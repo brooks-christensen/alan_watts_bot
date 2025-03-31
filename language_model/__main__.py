@@ -49,7 +49,7 @@ def main():
     config = load_config()
 
     if args.seed is not None and isinstance(args.seed, (int, float)):
-        set_seeds(config)
+        set_seeds(args.seed)
 
     # add logging
     logger.info('Adding logging...')
@@ -104,7 +104,7 @@ def main():
         # set the random seeds
         logger.info("Setting random seeds...")
         if args.seed is not None and isinstance(args.seed, (int, float)):
-            set_seeds(config=config)
+            set_seeds(args.seed)
 
         # create the optimizer
         logger.info("Creating optimizer...")
