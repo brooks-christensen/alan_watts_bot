@@ -1,4 +1,4 @@
-data/
+data/*
 results/
 fine-tuned-bert/
 fine-tuned-bert2/
