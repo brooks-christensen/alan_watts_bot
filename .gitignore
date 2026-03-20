@@ -13,6 +13,8 @@ resultsGPT2b/
 resultsGPT2c/
 models/
 *.pyc
-.old/
 model/
-*.old
+.vscode/
+.venv/
+__pycache__/
+*.pyc
