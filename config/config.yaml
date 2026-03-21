@@ -1,0 +1,50 @@
+dialogic_convert:
+  input_path: data/processed/rag_chunks.jsonl
+  output_path: data/processed/dialogic_analysis_full.jsonl
+  model: gpt-5.4
+  temperature: 0.2
+  max_records: null
+  overwrite: True
+  sleep_seconds: 0.25
+  max_retries: 3
+
+validate_dialogic:
+  input_path: data/processed/dialogic_analysis_full.jsonl
+  enriched_output_path: data/processed/dialogic_dataset_enriched_full.jsonl
+  training_output_path: data/processed/dialogic_training_pairs_full.jsonl
+  model: gpt-5.4
+  temperature: 0.2
+  max_records: null
+  overwrite: true
+  sleep_seconds: 0.25
+  max_retries: 2
+
+build_index:
+  embedding_model: text-embedding-3-small
+  rag_chunks_path: data/processed/rag_chunks.jsonl
+  index_output_dir: data/indexes
+  embedding_batch_size: 32
+  index_overwrite: true
+  embedding_sleep_seconds: 0.1
+  embedding_max_retries: 3
+
+retrieve:
+  index_dir: data/indexes
+  embedding_model: text-embedding-3-small
+  top_k: 3
+
+generate:
+  model: gpt-5.4
+  temperature: 0.2
+  max_output_tokens: 400
+  top_k: 3
+  max_context_chars_per_chunk: 2500
+  system_prompt: >
+    You are a reflective conversational assistant grounded in Alan Watts source material.
+    Answer the user's question using the provided excerpts as your primary basis.
+    Be calm, lucid, and conceptually clear.
+    Do not imitate theatrically.
+    Do not mention transcripts, chunks, retrieval, or source documents.
+    Do not invent outside facts or biography.
+    If the source material supports multiple angles, synthesize them clearly and naturally.
+    Keep the answer concise but meaningful.

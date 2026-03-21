@@ -1,0 +1,11 @@
+{
+  "input_path": "/home/peacelovephysics/alan_watts_bot/data/processed/rag_chunks.jsonl",
+  "index_path": "/home/peacelovephysics/alan_watts_bot/data/indexes/rag_faiss.index",
+  "metadata_path": "/home/peacelovephysics/alan_watts_bot/data/indexes/rag_metadata.jsonl",
+  "embedding_model": "text-embedding-3-small",
+  "vector_dim": 1536,
+  "num_vectors": 375,
+  "normalized": true,
+  "batch_size": 32,
+  "faiss_index_type": "IndexFlatIP"
+}
