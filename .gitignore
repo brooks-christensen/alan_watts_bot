@@ -2,11 +2,10 @@
 .vscode/
 __pycache__/
 .ipynb_checkpoints/
-logs/
-*.log
 
 archive/
-data/indexes/
+logs/
+*.log
 
 *.safetensors
 *.pt
@@ -17,4 +16,3 @@ data/indexes/
 *.npz
 *.pkl
 *.joblib
-*.zip
