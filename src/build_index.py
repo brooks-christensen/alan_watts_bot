@@ -318,6 +318,12 @@ def main() -> None:
     vector_dim = vectors.shape[1]
 
     index = faiss.IndexFlatIP(vector_dim)
+
+    vectors = np.ascontiguousarray(vectors, dtype=np.float32)
+
+    if vectors.ndim != 2:
+        raise ValueError(f"Expected 2D embedding matrix, got shape {vectors.shape}")
+
     index.add(vectors)
 
     logger.info(f"Built FAISS index with {index.ntotal} vectors and dimension {vector_dim}")

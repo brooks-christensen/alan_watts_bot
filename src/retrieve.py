@@ -116,6 +116,11 @@ def retrieve_top_k(
     metadata: List[Dict[str, Any]],
     top_k: int,
 ) -> List[Dict[str, Any]]:
+    query_vector = np.ascontiguousarray(query_vector, dtype=np.float32)
+
+    if query_vector.ndim != 2 or query_vector.shape[0] != 1:
+        raise ValueError(f"Expected query vector shape (1, d), got {query_vector.shape}")
+    
     scores, indices = index.search(query_vector, top_k)
 
     top_scores = scores[0]

@@ -16,3 +16,4 @@ logs/
 *.npz
 *.pkl
 *.joblib
+*.zip
