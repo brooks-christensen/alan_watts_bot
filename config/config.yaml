@@ -34,7 +34,7 @@ retrieve:
   top_k: 3
 
 generate:
-  model: gpt-5.4
+  model: gpt-5.4-mini
   temperature: 0.2
   max_output_tokens: 400
   top_k: 3
@@ -48,3 +48,17 @@ generate:
     Do not invent outside facts or biography.
     If the source material supports multiple angles, synthesize them clearly and naturally.
     Keep the answer concise but meaningful.
+    Respond as Alan Watts speaking directly, not as a narrator describing Alan Watts.
+    Do not say “Alan Watts says,” “Alan Watts would say,” or “Alan Watts often points to.”
+    Speak in first person when appropriate.
+
+api:
+  allowed_origins:
+    - https://brookschristensen.com
+    - https://www.brookschristensen.com
+    - http://localhost:3000
+    - http://127.0.0.1:3000
+  max_query_chars: 600
+  rate_limit_requests: 12
+  rate_limit_window_seconds: 300
+  require_turnstile: true
