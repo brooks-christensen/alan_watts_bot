@@ -532,18 +532,13 @@ The intent is **not** to produce fake historical artifacts or to present generat
 
 ---
 
-## License / usage note
+## License Note
 
-Add the license that matches your intended publication model for this repository.
+I want this work to be useful. The code in this repository is released under the MIT License, including commercial use, modification, and redistribution.
 
-If you plan to open-source only the code and not the full corpus, make that explicit here.
+That said, the software is provided “as is,” without warranty of any kind, and I assume no liability for any problems, damages, or claims arising from its use.
 
-Example:
-
-```text
-Code: MIT License
-Corpus / processed data: private or restricted
-```
+If you reuse corpus materials or source-derived data, please make sure you have the right to do so.
 
 ---
 
